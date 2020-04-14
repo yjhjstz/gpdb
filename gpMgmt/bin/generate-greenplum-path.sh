@@ -9,9 +9,8 @@ PYTHONPATH="${GPHOME}/lib/python"
 PATH="${GPHOME}/bin:${PYTHONHOME}/bin:${PATH}"
 LD_LIBRARY_PATH="${GPHOME}/lib:${PYTHONHOME}/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 
-# openssl configuration file path
-if [ -e "$GPHOME/etc/openssl.cnf" ]; then
-	OPENSSL_CONF="$GPHOME/etc/openssl.cnf"
+if [ -e "${GPHOME}/etc/openssl.cnf" ]; then
+	OPENSSL_CONF="${GPHOME}/etc/openssl.cnf"
 fi
 
 export GPHOME
