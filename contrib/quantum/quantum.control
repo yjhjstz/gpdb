@@ -1,0 +1,5 @@
+# quantum extension
+comment = 'multidimensional analyse extension'
+default_version = '1.3'
+module_pathname = '$libdir/quantum'
+relocatable = true

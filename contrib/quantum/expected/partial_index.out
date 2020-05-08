@@ -1,0 +1,32 @@
+create extension if not exists quantum;
+NOTICE:  extension "quantum" already exists, skipping
+create table test (id int , c1 float4[]);
+\copy test FROM 'data/test.csv' WITH csv;
+set deadlock_timeout = '1000s';
+CREATE INDEX test_idx_main ON test USING quantum_hnsw (c1 ) WITH (m=4, efbuild=50, dims=64, efsearch=30);
+INFO:  build index indtuples 10000, count 12620.
+INFO:  flush max level 6.
+set session enable_seqscan=false;
+select id from test where c1 ~@ ('{0.45, 0.72, 0.53, 0.14, 0.61, 0.77, 0.8, 0.59, 0.77, 0.93, 0.05, 0.86, 0.95, 0.96, 0.85, 0.04, 0.77, 0.7, 0.62, 0.75, 0.96, 0.89, 0.61, 0.07, 1, 0.57, 0.23, 0.12, 0.52, 0.74, 0.19, 0.91, 0.77, 0.05, 0, 0.23, 0.81, 0.91, 0.07, 0.14, 0.39, 0.25, 0.6, 0.6, 0.12, 0.53, 0.7, 0.07, 0.34, 0.3, 0.61, 0.73, 0.45, 1, 0.08, 0.82, 0.73, 0.99, 0.07, 0.54, 0.07, 0.04, 0.47, 0.51}', 0, 1) limit 1;
+  id  
+------
+ 2354
+(1 row)
+
+select id from test where c1 ~@ ('{0.45, 0.72, 0.53, 0.14, 0.61, 0.77, 0.8, 0.59, 0.77, 0.93, 0.05, 0.86, 0.95, 0.96, 0.85, 0.04, 0.77, 0.7, 0.62, 0.75, 0.96, 0.89, 0.61, 0.07, 1, 0.57, 0.23, 0.12, 0.52, 0.74, 0.19, 0.91, 0.77, 0.05, 0, 0.23, 0.81, 0.91, 0.07, 0.14, 0.39, 0.25, 0.6, 0.6, 0.12, 0.53, 0.7, 0.07, 0.34, 0.3, 0.61, 0.73, 0.45, 1, 0.08, 0.82, 0.73, 0.99, 0.07, 0.54, 0.07, 0.04, 0.47, 0.51}', 0, 1) and id < 1000 limit 1;
+ id  
+-----
+ 310
+(1 row)
+
+CREATE INDEX test_idx_part ON test USING quantum_hnsw (c1 ) WITH (m=4, efbuild=50, dims=64, efsearch=30)  WHERE  id < 1000;
+INFO:  build index indtuples 999, count 1264.
+INFO:  flush max level 5.
+select id from test where c1 ~@ ('{0.45, 0.72, 0.53, 0.14, 0.61, 0.77, 0.8, 0.59, 0.77, 0.93, 0.05, 0.86, 0.95, 0.96, 0.85, 0.04, 0.77, 0.7, 0.62, 0.75, 0.96, 0.89, 0.61, 0.07, 1, 0.57, 0.23, 0.12, 0.52, 0.74, 0.19, 0.91, 0.77, 0.05, 0, 0.23, 0.81, 0.91, 0.07, 0.14, 0.39, 0.25, 0.6, 0.6, 0.12, 0.53, 0.7, 0.07, 0.34, 0.3, 0.61, 0.73, 0.45, 1, 0.08, 0.82, 0.73, 0.99, 0.07, 0.54, 0.07, 0.04, 0.47, 0.51}', 0, 1) and id < 1000 limit 1;
+ id  
+-----
+ 106
+(1 row)
+
+drop index test_idx_main;
+drop index test_idx_part;
