@@ -72,7 +72,7 @@ blrescan(IndexScanDesc scan, ScanKey scankey, int nscankeys,
 	MemoryContext oldCxt;
 	int i = 0;
 	float* dur;
-	ScanKey skey;
+	ScanKey skey = NULL;
 	HeapTupleHeader query;
 	bool isNull;
 

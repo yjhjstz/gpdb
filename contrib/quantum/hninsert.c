@@ -14,7 +14,9 @@
 
 #include "access/genam.h"
 #include "access/generic_xlog.h"
-//#include "access/tableam.h"
+#if PG_VERSION_NUM >= 120000
+#include "access/tableam.h"
+#endif
 #include "access/parallel.h"
 #include <access/xact.h>
 
@@ -29,6 +31,15 @@
 #include "utils/rel.h"
 
 #include "hnsw.h"
+
+
+#if PG_VERSION_NUM >= 120000
+#define IndexBuildHeapScan(A, B, C, D, E, F) \
+table_index_build_scan(A, B, C, D, true, E, F, NULL)
+#elif PG_VERSION_NUM >= 110000
+#define IndexBuildHeapScan(A, B, C, D, E, F) \
+IndexBuildHeapScan(A, B, C, D, E, F, NULL)
+#endif
 
 /* GUC parameter */
 int			index_parallel = 0;
@@ -211,7 +222,7 @@ void _hnsw_insert(Relation index, Datum *values, bool *isnull,
 	Buffer	metabuf = InvalidBuffer;
 	ItemPointer ipd = NULL;
 	ItemPointerData start;
-	GenericXLogState *xstate;
+	GenericXLogState *xstate = NULL;
 	float* dur;
 	HnswBuildState *buildstate = (HnswBuildState *) state;
 	Size		itemsz = buildstate->blstate.sizeOfHnswTuple;
@@ -620,8 +631,8 @@ void build_graph(HnswBuildState* state, Relation index)
 {
 
 	int max_level = state->maxlevel, l;
-	size_t L1ntuples;
-	size_t L0pages;
+	size_t L1ntuples = 0;
+	size_t L0pages = 0;
 	BlockNumber blkno, nextblk;
 	MemoryContext oldCtx;
 	Page metapage;
