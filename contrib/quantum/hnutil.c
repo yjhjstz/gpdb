@@ -1032,14 +1032,7 @@ void make_link(HnswState* state, HnswNode* current, HnswNode* target, bool isBui
 	OffsetNumber offnum = ItemPointerGetOffsetNumber(&source->iptr);
 	//overwrite and update links
 	Assert(offnum != 0);
-#if 0
 	PageIndexTupleOverwrite(BufferGetPage(buf), offnum, (Item)source, source->size_tuple);
-#else
-	PageIndexDeleteNoCompact(BufferGetPage(buf), &offnum, 1);
-	if (PageAddItemExtended(BufferGetPage(buf), (Item) source, source->size_tuple, offnum,
-			PAI_OVERWRITE | PAI_ALLOW_FAR_OFFSET) == InvalidOffsetNumber)
-			elog(ERROR, "failed to add hnsw tuple");
-#endif
 	MarkBufferDirty(buf);
 	LockBuffer(buf, BUFFER_LOCK_UNLOCK);
 	
@@ -1400,14 +1393,8 @@ _updateHnswTuple(Relation index, ItemPointer ptr, HnswTuple* tuple, bool isBuild
 	OffsetNumber offnum = ItemPointerGetOffsetNumber(ptr);
 	//overwrite itup
 	Assert(offnum != 0);
-#if 0
 	PageIndexTupleOverwrite(page, offnum, (Item)tuple, tuple->size_tuple);
-#else
-	PageIndexDeleteNoCompact(page, &offnum, 1);
-	if (PageAddItemExtended(page, (Item) tuple, tuple->size_tuple, offnum,
-			PAI_OVERWRITE | PAI_ALLOW_FAR_OFFSET) == InvalidOffsetNumber)
-			elog(ERROR, "failed to add hnsw tuple");
-#endif	
+
 	if (isBuild) {
 		MarkBufferDirty(buf);
 	} else {
