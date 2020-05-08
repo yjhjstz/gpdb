@@ -3570,45 +3570,7 @@ validate_index(Oid heapId, Oid indexId, Snapshot snapshot)
 	heap_close(heapRelation, NoLock);
 }
 
-/*
- * itemptr_encode - Encode ItemPointer as int64/int8
- *
- * This representation must produce values encoded as int64 that sort in the
- * same order as their corresponding original TID values would (using the
- * default int8 opclass to produce a result equivalent to the default TID
- * opclass).
- *
- * As noted in validate_index(), this can be significantly faster.
- */
-static inline int64
-itemptr_encode(ItemPointer itemptr)
-{
-	BlockNumber block = ItemPointerGetBlockNumber(itemptr);
-	OffsetNumber offset = ItemPointerGetOffsetNumber(itemptr);
-	int64		encoded;
 
-	/*
-	 * Use the 16 least significant bits for the offset.  32 adjacent bits are
-	 * used for the block number.  Since remaining bits are unused, there
-	 * cannot be negative encoded values (We assume a two's complement
-	 * representation).
-	 */
-	encoded = ((uint64) block << 16) | (uint16) offset;
-
-	return encoded;
-}
-
-/*
- * itemptr_decode - Decode int64/int8 representation back to ItemPointer
- */
-static inline void
-itemptr_decode(ItemPointer itemptr, int64 encoded)
-{
-	BlockNumber block = (BlockNumber) (encoded >> 16);
-	OffsetNumber offset = (OffsetNumber) (encoded & 0xFFFF);
-
-	ItemPointerSet(itemptr, block, offset);
-}
 
 /*
  * validate_index_callback - bulkdelete callback to collect the index TIDs
