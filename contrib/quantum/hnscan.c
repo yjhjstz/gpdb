@@ -58,6 +58,8 @@ blbeginscan(Relation r, int nkeys, int norderbys)
 										ALLOCSET_LARGE_SIZES);
 	scan->opaque = so;
 	so->first_call = true;
+	so->q = NULL;
+	so->queue = NULL;
 	return scan;
 }
 
@@ -136,7 +138,9 @@ blendscan(IndexScanDesc scan)
 	MemoryContextReset(so->queueCxt);
 	MemoryContextDelete(so->queueCxt);
 
-	pfree(so);
+	so->q = NULL;
+	so->queue = NULL;
+	//pfree(so);
 }
 
 

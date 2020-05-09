@@ -90,7 +90,7 @@ hnsw_stats(PG_FUNCTION_ARGS)
 
 	totalPages = RelationGetNumberOfBlocks(rel);
   Buffer  metabuf = InvalidBuffer;
-  metap = _getcachedmetap(rel, &metabuf, false);
+  metap = _getcachedmetap(rel, &metabuf, true);
   elog(INFO, "level %d, algorithm %d.", metap->max_level_, metap->nproc);
   max_level = metap->max_level_;
   if (BufferIsValid(metabuf))
